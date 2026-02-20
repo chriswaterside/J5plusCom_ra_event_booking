@@ -601,7 +601,7 @@ class evb {
         $noOfPlaces = $this->noOfPlacesText();
         $signature = $this->options->signature;
         if ($signature === '') {
-            $signature = 'Regards<br/><br/>' . $this->options - booking_contact_name;
+            $signature = 'Regards<br/><br/>' . $this->options->booking_contact_name;
         }
 
         $search = ["{placesAvailable}", "{placesTaken}", "{totalPlacesAvailable}",
