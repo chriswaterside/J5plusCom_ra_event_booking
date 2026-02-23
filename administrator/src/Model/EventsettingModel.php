@@ -64,6 +64,7 @@ class EventsettingModel extends AdminModel {
      *
      * @since   1.0.0
      */
+    #[\Override]
     public function getTable($type = 'Eventsetting', $prefix = 'Administrator', $config = array()) {
         return parent::getTable($type, $prefix, $config);
     }
@@ -78,6 +79,7 @@ class EventsettingModel extends AdminModel {
      *
      * @since   1.0.0
      */
+    #[\Override]
     public function getForm($data = array(), $loadData = true) {
         // Initialise variables.
         $app = Factory::getApplication();
@@ -110,6 +112,7 @@ class EventsettingModel extends AdminModel {
      *
      * @since   1.0.0
      */
+    #[\Override]
     protected function loadFormData() {
     $data = Factory::getApplication()->getUserState(
         'com_ra_eventbooking.edit.eventsetting.data',
@@ -249,6 +252,7 @@ class EventsettingModel extends AdminModel {
      *
      * @since   1.0.0
      */
+    #[\Override]
     protected function prepareTable($table) {
         jimport('joomla.filter.output');
 

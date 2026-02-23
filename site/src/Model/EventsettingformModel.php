@@ -42,6 +42,7 @@ class EventsettingformModel extends FormModel {
      *
      * @throws  Exception
      */
+    #[\Override]
     protected function populateState() {
         $app = Factory::getApplication('com_ra_eventbooking');
 
@@ -127,6 +128,7 @@ class EventsettingformModel extends FormModel {
      *
      * @return  Table|boolean Table if found, boolean false on failure
      */
+    #[\Override]
     public function getTable($type = 'Eventsetting', $prefix = 'Administrator', $config = array()) {
         return parent::getTable($type, $prefix, $config);
     }
@@ -161,6 +163,7 @@ class EventsettingformModel extends FormModel {
      *
      * @since   1.0.0
      */
+    #[\Override]
     public function checkin($id = null) {
         // Get the id.
         $id = (!empty($id)) ? $id : (int) $this->getState('eventsetting.id');
@@ -189,6 +192,7 @@ class EventsettingformModel extends FormModel {
      *
      * @since   1.0.0
      */
+    #[\Override]
     public function checkout($id = null) {
         // Get the user id.
         $id = (!empty($id)) ? $id : (int) $this->getState('eventsetting.id');
@@ -223,6 +227,7 @@ class EventsettingformModel extends FormModel {
      *
      * @since   1.0.0
      */
+    #[\Override]
     public function getForm($data = array(), $loadData = true) {
         // Get the form.
         $form = $this->loadForm('com_ra_eventbooking.eventsetting', 'eventsettingform', array(
@@ -249,6 +254,7 @@ class EventsettingformModel extends FormModel {
      * @return  array  The default data is an empty array.
      * @since   1.0.0
      */
+    #[\Override]
     protected function loadFormData() {
         $data = Factory::getApplication()->getUserState('com_ra_eventbooking.edit.eventsetting.data', array());
 

@@ -80,7 +80,7 @@ ra.bookings.queryServer = function (self, action) {
             this.url = "index.php?option=com_ra_eventbooking&view=adminchangepaid&format=json";
             break;
         case'AdminEmailBookingList':
-            this.progressMsg = 'Sending emails to booking list ...';
+            this.progressMsg = 'Sending email with booking list ...';
             this.url = "index.php?option=com_ra_eventbooking&view=adminemailbookinglist&format=json";
             break;
         case 'VerifyEmail':
@@ -929,41 +929,46 @@ ra.bookings.blc = function () {
         return null;
     };
     this.list = function (tag, options) {
-        if (this.items.length === 0) {
-//            var c = document.createElement("p");
-//            c.innerHTML = 'There are no bookings ';
-//            tag.appendChild(c);
-            return;
-        }
         var tags = [
             {name: 'base', parent: 'root', tag: 'details'},
             {name: 'button', parent: 'base', tag: 'summary', attrs: {class: 'link-button tiny button mintcake'}, innerHTML: 'Bookings so far'},
+            {name: 'canedit', parent: 'base', tag: 'div', style: {clear: 'both',"color": "#8A2716"}},
             {name: 'list', parent: 'base', tag: 'div', style: {clear: 'both'}}
         ];
         var elements = ra.html.generateTags(tag, tags);
-        var table = document.createElement("table");
-        elements.list.appendChild(table);
-        var cols = [];
-        cols.push("Name");
-        if (options.guest) {
-            cols.push("Status");
-        }
+        var format = [{"title": "Name", "options": {align: "left"}, field: {type: 'text', filter: false, sort: false}},
+            {"title": "Status", "options": {align: "left"}},
+            {"title": "Places", "options": {align: "left"}},
+            {"title": "Member", "options": {align: "left", "style": {"color": "#8A2716"}}},
+            {"title": "Telephone", "options": {align: "left", "style": {"color": "#8A2716"}}},
+            {"title": "Paid", "options": {align: "left", "style": {"color": "#8A2716"}}},
+            {"title": "Action", "options": {align: "right", "style": {"min-width": "60px", "color": "#8A2716"}}}];
         if (options.canEdit) {
-            cols.push("Member");
-            cols.push("Telephone");
-        }
-        cols.push("Places");
-        if (options.displayPaid) {
-            cols.push("Paid");
+            elements.canedit.innerHTML = "You are logged on with Booking Contact access and have additional options.";
+            if (options.displayPaid) {
+                elements.canedit.innerHTML += "<br>To record payments you can click on the Paid field.";
+            }
         }
 
-        if (options.canEdit) {
-            cols.push("Actions");
+        if (!options.canEdit) {
+            format[3].ignore = true;
+            format[4].ignore = true;
+            format[5].ignore = true;
+            format[6].ignore = true;
+        } else {
+            if (!options.displayPaid) {
+                format[5].ignore = true;
+            }
         }
-        ra.html.addTableRow(table, cols, 'th');
+        format[1].ignore = !options.guest;
+
+        var table = new ra.paginatedTable(elements.list);
+        table.tableHeading(format);
         this.items.forEach(item => {
-            item.list(tag, table, options);
+            item.list(tag, table, format, options);
         });
+        table.tableEnd();
+
         if (options.canEdit) {
             var emailallc = document.createElement("div");
             emailallc.innerHTML = "Email all those who have booked&nbsp;&nbsp;";
@@ -975,6 +980,50 @@ ra.bookings.blc = function () {
             ra.bookings.displayEmailIcon(email, "Email above booking list to me", tag, "AdminEmailBookingList");
         }
     };
+//    this.listOLD = function (tag, options) {
+//        if (this.items.length === 0) {
+////            var c = document.createElement("p");
+////            c.innerHTML = 'There are no bookings ';
+////            tag.appendChild(c);
+//            return;
+//        }
+//        var tags = [
+//            {name: 'base', parent: 'root', tag: 'details'},
+//            {name: 'button', parent: 'base', tag: 'summary', attrs: {class: 'link-button tiny button mintcake'}, innerHTML: 'Bookings so far'},
+//            {name: 'list', parent: 'base', tag: 'div', style: {clear: 'both'}}
+//        ];
+//        var elements = ra.html.generateTags(tag, tags);
+//        var table = document.createElement("table");
+//        elements.list.appendChild(table);
+//        var cols = [];
+//        cols.push("Name");
+//        if (options.guest) {
+//            cols.push("Status");
+//        }
+//        cols.push("Places");
+//        if (options.canEdit) {
+//            cols.push("Member");
+//            cols.push("Telephone");
+//            if (options.displayPaid) {
+//                cols.push("Paid");
+//            }
+//            cols.push("Actions");
+//        }
+//        ra.html.addTableRow(table, cols, 'th');
+//        this.items.forEach(item => {
+//            item.list(tag, table, options);
+//        });
+//        if (options.canEdit) {
+//            var emailallc = document.createElement("div");
+//            emailallc.innerHTML = "Email all those who have booked&nbsp;&nbsp;";
+//            elements.list.appendChild(emailallc);
+//            ra.bookings.displayEmailIcon(emailallc, "Email all those who have booked", tag, "AdminEmailAllBooking");
+//            var email = document.createElement("div");
+//            email.innerHTML = "Email above booking list to me&nbsp;&nbsp;";
+//            elements.list.appendChild(email);
+//            ra.bookings.displayEmailIcon(email, "Email above booking list to me", tag, "AdminEmailBookingList");
+//        }
+//    };
 };
 // Booking list item
 ra.bookings.bli = function (value) {
@@ -991,35 +1040,53 @@ ra.bookings.bli = function (value) {
     this.noAttendees = function () {
         return this.attendees;
     };
-    this.list = function (eventTag, tag, options) {
-        var item = document.createElement("tr");
-        tag.appendChild(item);
-        var cols = [];
-        cols.push(this.name);
-        if (options.guest) {
-            if (this.id > 0) {
-                cols.push("Registered");
-            } else {
-                cols.push("Guest");
-            }
+    this.list = function (eventTag, table, format, options) {
+
+        table.tableRowStart();
+        table.tableRowItem(this.name, format[0]);
+        if (this.id > 0) {
+            table.tableRowItem("Registered", format[1]);
+        } else {
+            table.tableRowItem("Guest", format[1]);
         }
-        if (options.canEdit) {
-            cols.push(this.member);
-            cols.push(this.telephone);
-        }
-        cols.push(this.attendees);
-        if (options.displayPaid) {
-            cols.push(this.getPaid(options, eventTag, this));
-        }
-        if (options.canEdit) {
-            var self = this;
-            var span = document.createElement("span");
-            ra.bookings.displayDeleteIcon(span, "Delete this booking", eventTag, "deleteBooker", {user: self});
-            ra.bookings.displayEmailIcon(span, "Email this user", eventTag, "emailSingleBooker", {user: self});
-            cols.push(span);
-        }
-        ra.html.addTableRow(tag, cols);
+        table.tableRowItem(this.attendees, format[2]);
+        table.tableRowItem(this.member, format[3]);
+        table.tableRowItem(this.telephone, format[4]);
+        table.tableRowItem(this.getPaid(options, eventTag, this), format[5]);
+
+        var self = this;
+        var span = document.createElement("span");
+        ra.bookings.displayDeleteIcon(span, "Delete this booking", eventTag, "deleteBooker", {user: self});
+        ra.bookings.displayEmailIcon(span, "Email this user", eventTag, "emailSingleBooker", {user: self});
+        table.tableRowItem(span, format[6]);
+
+        table.tableRowEnd();
     };
+//    this.listOLD = function (eventTag, tag, options) {
+//        var cols = [];
+//        cols.push(this.name);
+//        if (options.guest) {
+//            if (this.id > 0) {
+//                cols.push("Registered");
+//            } else {
+//                cols.push("Guest");
+//            }
+//        }
+//        cols.push(this.attendees);
+//        if (options.canEdit) {
+//            cols.push(this.member);
+//            cols.push(this.telephone);
+//            if (options.displayPaid) {
+//                cols.push(this.getPaid(options, eventTag, this));
+//            }
+//            var self = this;
+//            var span = document.createElement("span");
+//            ra.bookings.displayDeleteIcon(span, "Delete this booking", eventTag, "deleteBooker", {user: self});
+//            ra.bookings.displayEmailIcon(span, "Email this user", eventTag, "emailSingleBooker", {user: self});
+//            cols.push(span);
+//        }
+//        ra.html.addTableRow(tag, cols);
+//    };
     this.getPaid = function (options, eventTag, user) {
         var span = document.createElement("span");
         span.classList.add('ra', 'bookings', 'paid');

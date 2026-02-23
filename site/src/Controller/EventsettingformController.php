@@ -29,6 +29,7 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
  */
 class EventsettingformController extends FormController {
 
+    #[\Override]
     public function display($cachable = false, $urlparams = []) {
         $model = $this->getModel();
         $item = $model->getItem();  // Load your item data
@@ -51,6 +52,7 @@ class EventsettingformController extends FormController {
      *
      * @throws  Exception
      */
+    #[\Override]
     public function edit($key = NULL, $urlVar = NULL) {
         // Get the previous edit id (if any) and the current edit id.
         $previousId = (int) $this->app->getUserState('com_ra_eventbooking.edit.eventsetting.id');
@@ -84,6 +86,7 @@ class EventsettingformController extends FormController {
      * @throws  Exception
      * @since   1.0.0
      */
+    #[\Override]
     public function save($key = NULL, $urlVar = NULL) {
         // Check for request forgeries.
         $this->checkToken();
@@ -186,6 +189,7 @@ class EventsettingformController extends FormController {
      *
      * @throws Exception
      */
+    #[\Override]
     public function cancel($key = NULL) {
 
         // Get the current edit id.
@@ -201,7 +205,8 @@ class EventsettingformController extends FormController {
 
         $menu = Factory::getApplication()->getMenu();
         $item = $menu->getActive();
-        $url = (empty($item->link) ? 'index.php?option=com_ra_eventbooking&view=eventsettings' : $item->link);
+        $url = 'index.php?option=com_ra_eventbooking&view=eventsettings';
+        // $url = (empty($item->link) ? 'index.php?option=com_ra_eventbooking&view=eventsettings' : $item->link);
         $this->setRedirect(Route::_($url, false));
     }
 
@@ -258,6 +263,7 @@ class EventsettingformController extends FormController {
      *
      * @since   1.6
      */
+    #[\Override]
     protected function postSaveHook(BaseDatabaseModel $model, $validData = array()) {
         
     }
