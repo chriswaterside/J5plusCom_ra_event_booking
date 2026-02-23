@@ -15,6 +15,8 @@ defined('_JEXEC') or die('Restricted access');
 
 use Joomla\CMS\Factory;
 use \Joomla\CMS\Form\FormField;
+use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Component\ComponentHelper;
 
 /**
  * Class SubmitField
@@ -23,7 +25,7 @@ use \Joomla\CMS\Form\FormField;
  */
 class BookingcontactField extends FormField {
 
-    protected $type = 'bookingcontact';
+    protected $type = 'Bookingcontact';
     protected $value;
     protected $for;
 
@@ -32,21 +34,34 @@ class BookingcontactField extends FormField {
      *
      * @return string
      */
+    #[\Override]
     protected function getInput() {
+
+        $componentParams = ComponentHelper::getParams('com_ra_eventbooking');
+        $id = $componentParams->get('booking_contact_id', 0);
+        If ($id < 1) {
+            throw new \RuntimeException('Group Booking Contact not set - contact group');
+        }
+        $juser = Factory::getUser($id);
+        $user = (object) ['name' => $juser->name,
+                    'email' => $juser->email];
         $options = $this->getOptions();
-        $html = '<select name="' . $this->name . '" value="' . $this->value . '" >';
-        $html .= '<option value="">Not specified [Use Group Booking Contact]</option>';
+        $html = '<select class="form-select" name="' . $this->name . '" value="' . $this->value . '" >';
+
+        $html .= '<option value="">Use global [' . $juser->name . ']</option>';
+
         foreach ($options as $option) {
-            if ($this->value === $option->value) {
-                $html .= '<option value="' . $option->value . '" selected="selected">' . $option->text . '</option>';
+            if ($this->value === strval($option->value)) {
+                $html .= '<option value = "' . $option->value . '" selected = "selected">' . $option->text . '</option>';
             } else {
-                $html .= '<option value="' . $option->value . '">' . $option->text . '</option>';
+                $html .= '<option value = "' . $option->value . '">' . $option->text . '</option>';
             }
         }
         $html .= '</select>';
         return $html;
     }
 
+    #[\Override]
     protected function getLabel() {
         return parent::getLabel();
     }
@@ -61,7 +76,7 @@ class BookingcontactField extends FormField {
         $options = [];
         foreach ($users as $user) {
             if ($this->canEdit($user)) {
-                $options[] = (object) ['value' => $user->id, 'text' => $user->name];
+                $options[] = (object) ['value' => $user->id, 'text' => $user->name . ' (' . $user->username . ')'];
             }
         }
         return $options;

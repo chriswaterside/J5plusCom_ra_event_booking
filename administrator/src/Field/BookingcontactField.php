@@ -16,6 +16,7 @@ defined('_JEXEC') or die('Restricted access');
 use Joomla\CMS\Factory;
 use \Joomla\CMS\Form\FormField;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Component\ComponentHelper;
 
 /**
  * Class SubmitField
@@ -37,21 +38,28 @@ class BookingcontactField extends FormField {
     #[\Override]
     protected function getInput() {
         $context = (string) $this->element['context'];  // "config"
-
         if ($context === 'config') {
-            // Config.xml specific logic
+        // Config.xml specific logic
             $this->configMode = true;
         }
+        $componentParams = ComponentHelper::getParams('com_ra_eventbooking');
+        $id = $componentParams->get('booking_contact_id', 0);
+        If ($id < 1) {
+            throw new \RuntimeException('Group Booking Contact not set - contact group');
+        }
+        $juser = Factory::getUser($id);
+        $user = (object) ['name' => $juser->name,
+                    'email' => $juser->email];
         $options = $this->getOptions();
         $html = '<select class="form-select" name="' . $this->name . '" value="' . $this->value . '" >';
         if (!$this->configMode) {
-            $html .= '<option value="">Not specified [Use Group Booking Contact]</option>';
+            $html .= '<option value="">Use global [' . $juser->name . ']</option>';
         }
         foreach ($options as $option) {
-            if ($this->value === $option->value) {
-                $html .= '<option value="' . $option->value . '" selected="selected">' . $option->text . '</option>';
+            if ($this->value === strval($option->value)) {
+                $html .= '<option value = "' . $option->value . '" selected = "selected">' . $option->text . '</option>';
             } else {
-                $html .= '<option value="' . $option->value . '">' . $option->text . '</option>';
+                $html .= '<option value = "' . $option->value . '">' . $option->text . '</option>';
             }
         }
         $html .= '</select>';

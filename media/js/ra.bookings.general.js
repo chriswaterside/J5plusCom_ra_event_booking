@@ -932,7 +932,7 @@ ra.bookings.blc = function () {
         var tags = [
             {name: 'base', parent: 'root', tag: 'details'},
             {name: 'button', parent: 'base', tag: 'summary', attrs: {class: 'link-button tiny button mintcake'}, innerHTML: 'Bookings so far'},
-            {name: 'canedit', parent: 'base', tag: 'div', style: {clear: 'both',"color": "#8A2716"}},
+            {name: 'canedit', parent: 'base', tag: 'div', style: {clear: 'both', "color": "#8A2716"}},
             {name: 'list', parent: 'base', tag: 'div', style: {clear: 'both'}}
         ];
         var elements = ra.html.generateTags(tag, tags);
@@ -946,7 +946,7 @@ ra.bookings.blc = function () {
         if (options.canEdit) {
             elements.canedit.innerHTML = "You are logged on with Booking Contact access and have additional options.";
             if (options.displayPaid) {
-                elements.canedit.innerHTML += "<br>To record payments you can click on the Paid field.";
+                elements.canedit.innerHTML += "<br>To record payments, click on the Paid field.";
             }
         }
 
@@ -972,10 +972,12 @@ ra.bookings.blc = function () {
         if (options.canEdit) {
             var emailallc = document.createElement("div");
             emailallc.innerHTML = "Email all those who have booked&nbsp;&nbsp;";
+            emailallc.style.color = '#8A2716';
             elements.list.appendChild(emailallc);
             ra.bookings.displayEmailIcon(emailallc, "Email all those who have booked", tag, "AdminEmailAllBooking");
             var email = document.createElement("div");
             email.innerHTML = "Email above booking list to me&nbsp;&nbsp;";
+            email.style.color = '#8A2716';
             elements.list.appendChild(email);
             ra.bookings.displayEmailIcon(email, "Email above booking list to me", tag, "AdminEmailBookingList");
         }
